@@ -1,10 +1,13 @@
 use std::rc::Rc;
-use winit;
+use winit::{self, dpi::LogicalSize};
 
 #[cfg(target_arch = "wasm32")]
 trait WinitWeb {
     /// Add a canvas element to the HTML body and enable resize support.
     fn init_web(self: &Rc<Self>);
+
+    /// Get the size of the browser client area.
+    fn get_client_size() -> LogicalSize<f64>;
 }
 
 #[cfg(target_arch = "wasm32")]
@@ -38,6 +41,14 @@ impl WinitWeb for winit::window::Window {
             .unwrap();
         
         closure.forget();
+    }
+
+    fn get_client_size() -> LogicalSize<f64> {
+        let client_window = web_sys::window().unwrap();
+        LogicalSize::new(
+            client_window.inner_width().unwrap().as_f64().unwrap(),
+            client_window.inner_height().unwrap().as_f64().unwrap()
+        )
     }
 }
 
