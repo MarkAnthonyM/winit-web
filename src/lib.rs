@@ -1,7 +1,7 @@
 use std::rc::Rc;
 use winit::{self, dpi::LogicalSize};
 
-trait WinitWeb {
+pub trait WinitWeb {
     /// Add a canvas element to the HTML body and enable resize support.
     fn init_web(self: &Rc<Self>);
 
