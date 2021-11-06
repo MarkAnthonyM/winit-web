@@ -1,10 +1,12 @@
 use log::error;
-use pixels::{Pixels, SurfaceTexture};
+use pixels::{PixelsBuilder, SurfaceTexture};
 use winit::dpi::LogicalSize;
 use winit::event::{Event, VirtualKeyCode};
 use winit::event_loop::{ControlFlow, EventLoop};
 use winit::window::WindowBuilder;
 use winit_input_helper::WinitInputHelper;
+use winit_web::WinitWeb;
+use std::rc::Rc;
 
 const WIDTH: u32 = 320;
 const HEIGHT: u32 = 240;
@@ -36,10 +38,15 @@ impl World {
 }
 
 fn main() {
-    proto_run();
+    #[cfg(target_arch = "wasm32")]
+    {
+        std::panic::set_hook(Box::new(console_error_panic_hook::hook));
+
+        wasm_bindgen_futures::spawn_local(proto_run());
+    }
 }
 
-fn proto_run() {
+async fn proto_run() {
     let event_loop = EventLoop::new();
     let window = {
         let size = LogicalSize::new(WIDTH as f64, HEIGHT as f64);
@@ -51,10 +58,24 @@ fn proto_run() {
             .expect("WindowBuilder error")
     };
 
+    let window = Rc::new(window);
+    window.init_web();
+
     let mut input = WinitInputHelper::new();
 
-    let surface_texture = SurfaceTexture::new(WIDTH, HEIGHT, &window);
-    let mut pixels = Pixels::new(WIDTH, HEIGHT, surface_texture).unwrap();
+    let mut pixels = {
+        let window_size = window.inner_size();
+        let surface_texture = SurfaceTexture::new(window_size.width, window_size.height, window.as_ref());
+        PixelsBuilder::new(WIDTH, HEIGHT, surface_texture)
+            .wgpu_backend(pixels::wgpu::Backends::all())
+            .device_descriptor(pixels::wgpu::DeviceDescriptor {
+                limits: pixels::wgpu::Limits::downlevel_webgl2_defaults(),
+                ..Default::default()
+            })
+            .build_async()
+            .await
+            .expect("PixelsBuilder error")
+    };
 
     let mut world = World::new();
 
