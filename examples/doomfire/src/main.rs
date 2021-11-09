@@ -11,11 +11,11 @@ use std::rc::Rc;
 const WIDTH: u32 = 320;
 const HEIGHT: u32 = 240;
 
-struct World {
+struct Scene {
     scene_palette: Vec<(u8, u8, u8, u8)>,
 }
 
-impl World {
+impl Scene {
     fn new() -> Self {
         let scene_palette = vec![
             (7, 7, 7, 1),
@@ -116,11 +116,11 @@ async fn proto_run() {
             .expect("PixelsBuilder error")
     };
 
-    let mut world = World::new();
+    let mut scene = Scene::new();
 
     event_loop.run(move |event, _, control_flow| {
         if let Event::RedrawRequested(_) = event {
-            world.draw(pixels.get_frame());
+            scene.draw(pixels.get_frame());
             if pixels
                 .render()
                 .map_err(|e| error!("pixels.render() failed: {}", e))
@@ -143,7 +143,7 @@ async fn proto_run() {
             }
 
             // Update internal state and request a redraw
-            world.update();
+            scene.update();
             window.request_redraw();
         }
     })
