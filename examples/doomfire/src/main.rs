@@ -74,6 +74,11 @@ impl Scene {
             pixel.copy_from_slice(&rgba);
         }
     }
+
+    // Convenience method, converts tuple to array 
+    fn convert_swatch(&self, swatch: (u8, u8, u8, u8)) -> [u8; 4] {
+        [swatch.0, swatch.1, swatch.2, swatch.3]
+    }
 }
 
 fn main() {
