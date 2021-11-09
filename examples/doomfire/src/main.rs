@@ -67,10 +67,17 @@ impl Scene {
 
     fn draw(&self, frame: &mut [u8]) {
         for (i, pixel) in frame.chunks_exact_mut(4).enumerate() {
-            let x = (i % WIDTH as usize) as i16;
-            let y = (i / WIDTH as usize) as i16;
+            let x = (i % WIDTH as usize) as u32;
+            let y = (i / WIDTH as usize) as u32;
 
-            let rgba = [0xff, 0xff, 0xff, 0xff];
+            let mut rgba = [0x00, 0x00, 0x00, 0x00];
+
+            // Setup fire igniter row
+            if y == (HEIGHT - 1) {
+                let swatch = self.convert_swatch(*self.scene_palette.last().unwrap());
+                rgba = swatch;
+            }
+            
             pixel.copy_from_slice(&rgba);
         }
     }
