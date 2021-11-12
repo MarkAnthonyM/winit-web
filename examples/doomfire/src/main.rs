@@ -12,6 +12,7 @@ const WIDTH: u32 = 320;
 const HEIGHT: u32 = 240;
 
 struct Scene {
+    scene_buffer: Vec<usize>,
     scene_palette: Vec<(u8, u8, u8, u8)>,
 }
 
@@ -55,8 +56,19 @@ impl Scene {
             (239, 239, 199, 1),
             (255, 255, 255, 1)
         ];
+
+        // Initialize doom scene
+        let mut scene_buffer = vec![(WIDTH * HEIGHT) as usize; 0];
+
+        // Setup fire igniter row
+        for x in 0..WIDTH {
+            let y = WIDTH - 1;
+            let pixel = y * WIDTH + x;
+            scene_buffer[pixel as usize] = scene_palette.len() - 1;
+        }
         
         Self {
+            scene_buffer,
             scene_palette,
         }
     }
@@ -71,12 +83,6 @@ impl Scene {
             let y = (i / WIDTH as usize) as u32;
 
             let mut rgba = [0x00, 0x00, 0x00, 0x00];
-
-            // Setup fire igniter row
-            if y == (HEIGHT - 1) {
-                let swatch = self.convert_swatch(*self.scene_palette.last().unwrap());
-                rgba = swatch;
-            }
             
             pixel.copy_from_slice(&rgba);
         }
