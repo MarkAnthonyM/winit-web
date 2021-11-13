@@ -1,5 +1,6 @@
 use log::error;
 use pixels::{PixelsBuilder, SurfaceTexture};
+use rand::prelude::*;
 use winit::dpi::LogicalSize;
 use winit::event::{Event, VirtualKeyCode};
 use winit::event_loop::{ControlFlow, EventLoop};
@@ -98,6 +99,8 @@ impl Scene {
     // Iterate through scene buffer. Spread fire from
     // bottom-most row, upwards
     fn propagate_fire(&mut self) {
+        let mut rng = thread_rng();
+        
         for y in 5..HEIGHT {
             for x in 0..WIDTH {
                 let src = (y * WIDTH + x) as usize;
@@ -106,7 +109,8 @@ impl Scene {
                 if pixel == 0 {
                     self.scene_buffer[src - WIDTH as usize] = pixel;
                 } else {
-                    self.scene_buffer[src - WIDTH as usize] = pixel - 1;
+                    let ran_num: usize = rng.gen_range(0..2);
+                    self.scene_buffer[src - WIDTH as usize] = pixel - ran_num;
                 }
             }
         }
