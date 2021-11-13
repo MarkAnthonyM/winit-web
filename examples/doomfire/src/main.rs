@@ -58,11 +58,11 @@ impl Scene {
         ];
 
         // Initialize doom scene
-        let mut scene_buffer = vec![(WIDTH * HEIGHT) as usize; 0];
+        let mut scene_buffer = vec![0; (WIDTH * HEIGHT) as usize];
 
         // Setup fire igniter row
         for x in 0..WIDTH {
-            let y = WIDTH - 1;
+            let y = HEIGHT - 1;
             let pixel = y * WIDTH + x;
             scene_buffer[pixel as usize] = scene_palette.len() - 1;
         }
@@ -77,12 +77,14 @@ impl Scene {
         //Nothing here yet
     }
 
-    fn draw(&self, frame: &mut [u8]) {
+    fn draw(&mut self, frame: &mut [u8]) {
+        self.propagate_fire();
+        
         for (i, pixel) in frame.chunks_exact_mut(4).enumerate() {
-            let x = (i % WIDTH as usize) as u32;
-            let y = (i / WIDTH as usize) as u32;
+            let color = self.scene_buffer[i];
+            let swatch = self.convert_swatch(self.scene_palette[color]);
 
-            let mut rgba = [0x00, 0x00, 0x00, 0x00];
+            let rgba = swatch;
             
             pixel.copy_from_slice(&rgba);
         }
@@ -91,6 +93,23 @@ impl Scene {
     // Convenience method, converts tuple to array 
     fn convert_swatch(&self, swatch: (u8, u8, u8, u8)) -> [u8; 4] {
         [swatch.0, swatch.1, swatch.2, swatch.3]
+    }
+
+    // Iterate through scene buffer. Spread fire from
+    // bottom-most row, upwards
+    fn propagate_fire(&mut self) {
+        for y in 5..HEIGHT {
+            for x in 0..WIDTH {
+                let src = (y * WIDTH + x) as usize;
+                let pixel = self.scene_buffer[src];
+
+                if pixel == 0 {
+                    self.scene_buffer[src - WIDTH as usize] = pixel;
+                } else {
+                    self.scene_buffer[src - WIDTH as usize] = pixel - 1;
+                }
+            }
+        }
     }
 }
 
