@@ -110,7 +110,8 @@ impl Scene {
                     self.scene_buffer[src - WIDTH as usize] = pixel;
                 } else {
                     let ran_num: usize = rng.gen_range(0..2);
-                    self.scene_buffer[src - WIDTH as usize] = pixel - ran_num;
+                    let off_set = rng.gen_range(0..2);
+                    self.scene_buffer[(src - WIDTH as usize) - off_set] = pixel - ran_num;
                 }
             }
         }
